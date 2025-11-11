@@ -4,10 +4,14 @@
   "description": "Add a game of tetris to your site",
   "main": "dist/blockrain.jquery.min.js",
   "dependencies": {
-    "jquery": "~1.11.3"
+    "jquery": "~1.11.3",
+    "vite": "^5.0.0"
   },
   "scripts": {
-    "build": "gulp build"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port $PORT --host",
+    "start": "vite preview --port $PORT --host"
   },
   "devDependencies": {
     "gulp": "^3.8.8",
@@ -20,11 +24,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Aerolab/blockrain.js"
+    "url": "https://github.com/Limbika2222/Portifolio-Limbika.git"
   },
-  "author": "Aerolab",
+  "author": "Limbika2222",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Aerolab/blockrain.js/issues"
+    "url": "https://github.com/Limbika2222/Portifolio-Limbika/issues"
   }
 }
