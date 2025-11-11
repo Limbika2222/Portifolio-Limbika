@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Limbika’s Blockrain Portfolio Game</title>
+
+  <meta name="description" content="A gamified portfolio by Limbika Zangazanga using Blockrain.js" />
+  <meta name="keywords" content="portfolio, limbika, tetris, game, javascript" />
+  <meta name="author" content="Limbika Zangazanga" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+  <link rel="shortcut icon" href="assets/images/favicon.png">
+  <link href='http://fonts.googleapis.com/css?family=Play:400,700' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="src/blockrain.css">
+
+  <style>
+    /* 🌟 Added Animations */
+    @keyframes bgPulse {
+      0% { background-color: rgba(0,0,0,0.85); }
+      50% { background-color: rgba(0,0,0,0.65); }
+      100% { background-color: rgba(0,0,0,0.85); }
+    }
+
+    @keyframes fadeInBounce {
+      0% { opacity: 0; transform: scale(0.8); }
+      60% { opacity: 1; transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes popupSlideUp {
+      0% { transform: translateX(-50%) translateY(100%); opacity: 0; }
+      50% { transform: translateX(-50%) translateY(-10px); opacity: 1; }
+      100% { transform: translateX(-50%) translateY(0); opacity: 1; }
+    }
+    @keyframes popupGlow {
+      0% { box-shadow: 0 0 0px #fff; }
+      50% { box-shadow: 0 0 20px #fff; }
+      100% { box-shadow: 0 0 0px #fff; }
+    }
+
+    .skill-popup {
+      position: fixed;
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100%);
+      background: #ff9800;
+      color: #fff;
+      font-size: 18px;
+      font-weight: bold;
+      padding: 10px 20px;
+      border-radius: 8px;
+      opacity: 0;
+      z-index: 9999;
+      pointer-events: none;
+    }
+    .skill-popup.show {
+      animation: popupSlideUp 0.7s ease-out, popupGlow 1.2s ease-in-out infinite alternate;
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .win-screen {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.92);
+      color: white;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      z-index: 10000;
+      font-family: 'Play', sans-serif;
+      padding: 24px;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+    .win-screen.show {
+      display: flex;
+      opacity: 1;
+      animation: bgPulse 3s infinite ease-in-out, fadeInBounce 0.9s ease;
+    }
+    .win-screen.fade-out {
+      opacity: 0;
+      transition: opacity 1s ease;
+      pointer-events: none;
+    }
+
+    .win-screen h2 {
+      font-size: 36px;
+      margin-bottom: 12px;
+      color: #ffd54f;
+      text-shadow: 0 0 20px rgba(255,213,79,0.6);
+      animation: fadeInBounce 1s ease;
+    }
+    .win-screen p {
+      max-width: 700px;
+      line-height: 1.6;
+      font-size: 18px;
+      margin: 6px 0;
+      animation: fadeInBounce 1.3s ease;
+    }
+    .win-screen a {
+      color: #4fc3f7;
+      text-decoration: none;
+      font-weight: bold;
+      margin-top: 10px;
+      animation: fadeInBounce 1.5s ease;
+    }
+    .continue-btn {
+      margin-top: 20px;
+      background: #ff9800;
+      color: white;
+      border: none;
+      padding: 12px 22px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: transform 0.3s ease, background 0.3s ease;
+      animation: fadeInBounce 1.8s ease;
+    }
+    .continue-btn:hover {
+      transform: scale(1.05);
+      background: #ffa726;
+    }
+
+    .demo-score {
+      position: relative;
+      margin-bottom: 8px;
+      color: #fff;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .demo-score .label { font-size: 14px; opacity: 0.85; margin-right: 8px; }
+    .demo-score .value { font-size: 18px; color: #ffd54f; }
+
+    @media (max-width: 800px) {
+      .win-screen h2 { font-size: 28px; }
+      .win-screen p { font-size: 16px; }
+    }
+  </style>
+</head>
+
+<body>
+<section id="hero" style="min-height:600px;">
+  <div class="welcome">
+    <h1><img src="assets/images/logo.png" width="560" alt=""></h1>
+    <p>Hello &amp; Welcome to the work of Limbika Zangazanga.</p>
+    <div class="buttons">
+      <a href="dist/resume.png" download="resume.png" class="btn btn-download">Download Resume</a>
+      <a href="https://github.com/Limbika2222" class="btn btn-github" target="_blank">Github</a>
+    </div>
+  </div>
+  <div class="game" id="cover-tetris"></div>
+</section>
+
+<section id="versus">
+  <header><h1>How To Play</h1></header>
+  <article id="versus-arena">
+    <div class="game-holder" id="tetris-versus-1"><div class="score">0</div><div class="game"></div></div>
+    <div class="game-holder" id="tetris-versus-2"><div class="score">0</div><div class="game"></div></div>
+  </article>
+</section>
+
+<section id="examples">
+  <header><h1>Play and Let The Game Reveal My Skills!</h1></header>
+  <article id="example-slider">
+    <div class="example">
+      <div class="theme">theme: <strong>"vim"</strong></div>
+      <div class="instructions">
+        Use arrow keys to move, rotate and drop blocks.
+        <div class="keyboard">
+          <div class="key key-up"></div><div class="key key-left"></div>
+          <div class="key key-down"></div><div class="key key-right"></div>
+        </div>
+      </div>
+      <div class="demo-score">
+        <span class="label">Demo Score:</span>
+        <span id="demo-score-value" class="value">0</span>
+      </div>
+      <div class="game" id="tetris-demo"></div>
+    </div>
+  </article>
+</section>
+
+<footer id="footer">
+  <p>If you like me, contact: limbika.zangazanga@iic.ac.in.</p>
+  <div class="buttons">
+    <a href="dist/certificate.png" download="Certificate.png" class="btn btn-download">My Certificate</a>
+    <a href="https://www.linkedin.com/in/limbika-zangazanga-3605b116b/" class="btn btn-linkedin">Linkedin</a>
+  </div>
+</footer>
+
+<div id="win-screen" class="win-screen" aria-hidden="true">
+  <h2>🎉 You Won! 🎉</h2>
+  <p id="win-score-text">Congratulations — you reached the goal!</p>
+  <p id="win-message-text"></p>
+  <p>Skills Unlocked: JavaScript | HTML | SQL | Machine Learning | Game Design</p>
+  <a href="mailto:limbika.zangazanga@iic.ac.in">📩 Contact Me</a><br><br>
+  <a href="https://github.com/Limbika2222" target="_blank">🌐 Visit My GitHub</a><br>
+  <button id="continue-btn" class="continue-btn">Continue</button>
+</div>
+
+<script src="assets/js/jquery-1.11.1.min.js"></script>
+<script src="src/blockrain.jquery.libs.js"></script>
+<script src="src/blockrain.jquery.src.js"></script>
+<script src="src/blockrain.jquery.themes.js"></script>
+
+<script>
+  const skills = ["HTML","CSS","JavaScript","Python","React","Data Science","Machine Learning","UI/UX Design"];
+  let score = 0;
+  let firstWin = false;
+  const WIN_GOAL_1 = 1000;
+  const WIN_GOAL_2 = 6000;
+  const POINTS_PER_LINE = 400;
+
+  // Cover autoplay
+  $('#cover-tetris').blockrain({
+    autoplay: true,
+    autoplayRestart: true,
+    speed: 100,
+    autoBlockWidth: true,
+    autoBlockSize: 25,
+    theme: 'candy'
+  });
+
+  // Versus bots
+  const versusSpeed = 100;
+  $('#tetris-versus-1 .game').blockrain({ autoplay: true, autoplayRestart: true, speed: versusSpeed });
+  $('#tetris-versus-2 .game').blockrain({ autoplay: true, autoplayRestart: true, speed: versusSpeed });
+
+  // Playable demo
+  const $demo = $('#tetris-demo').blockrain({
+    speed: 20,
+    theme: 'vim',
+    onLine: lines => {
+      if (!lines) lines = 1;
+      score += lines * POINTS_PER_LINE;
+      $('#demo-score-value').text(score);
+      showSkillPopup(skills[Math.floor(Math.random() * skills.length)]);
+
+      if (score >= WIN_GOAL_1 && !firstWin) {
+        firstWin = true;
+        $demo.blockrain('pause');
+        showWinScreen(score, "first");
+      }
+      if (score >= WIN_GOAL_2 && firstWin) {
+        $demo.blockrain('pause');
+        showWinScreen(score, "second");
+      }
+    },
+    onGameOver: () => { score = 0; $('#demo-score-value').text(score); }
+  });
+
+  function showSkillPopup(skill) {
+    const popup = document.createElement("div");
+    popup.className = "skill-popup";
+    popup.textContent = "+ " + skill + " Skill!";
+    document.body.appendChild(popup);
+    setTimeout(() => popup.classList.add("show"), 60);
+    setTimeout(() => popup.remove(), 2300);
+  }
+
+  function showWinScreen(finalScore, type) {
+  $('#win-score-text').text('You reached ' + finalScore + ' points — Great job!');
+
+  if (type === "first") {
+    $('#win-message-text').html("Hi, I’m <strong>Limbika Zangazanga</strong> — a creative developer passionate about building interactive and intelligent systems.<br><br>Next Level: Education Reveal at 6000 points!");
+  } else {
+    $('#win-message-text').html("<strong>Education:</strong><br>MSc Informatics, Delhi University, Delhi, India.<br><br>Now you’ve completed my full portfolio journey!");
+  }
+
+  $('#win-screen').addClass('show').attr('aria-hidden', 'false');
+
+  // ⏳ Keep win screen visible longer (8 seconds)
+  setTimeout(() => {
+    $('#win-screen').removeClass('show').attr('aria-hidden', 'true');
+    $demo.blockrain('resume');
+  }, 8000); // Adjust 8000 → 10000 for 10 seconds if you want longer
+}
+
+
+  function fadeOutWin() {
+    $('#win-screen').addClass('fade-out');
+    setTimeout(() => $('#win-screen').removeClass('show fade-out').attr('aria-hidden','true'), 1000);
+  }
+
+  $('#continue-btn').on('click', () => {
+    fadeOutWin();
+    $demo.blockrain('resume');
+  });
+</script>
+</body>
+</html>
